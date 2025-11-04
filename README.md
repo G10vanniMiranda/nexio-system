@@ -1,3 +1,35 @@
+NEXIO SYSTEM – Painel de Performance Inteligente
+
+Estrutura de Pastas Recomendada
+
+```
+/app
+	/dashboard
+		page.tsx              // Monta o layout com os componentes
+/app/api
+	/performance/route.ts   // Endpoint mock de performance
+	/leads/route.ts         // Endpoint mock de leads
+/components
+	Header.tsx
+	SectionTitle.tsx
+	PerformanceChart.tsx
+	LeadsTable.tsx
+	FeatureCard.tsx
+	Footer.tsx
+/public
+	/icons
+	/logos
+	/avatars
+/styles
+	globals.css
+```
+
+Explicação Resumida
+
+"Queremos um dashboard premium, com design dark moderno e acentos dourados/azuis. O layout tem três seções: cabeçalho com saudação, overview de performance (gráfico + estatísticas), leads capturados (tabela dinâmica) e cards de funções da IA. O foco é responsividade, animações sutis e visual futurista."
+
+—
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -16,7 +48,7 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can start editing the dashboard by modifying `app/dashboard/page.tsx`. The root route `/` redirects to `/dashboard`.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
