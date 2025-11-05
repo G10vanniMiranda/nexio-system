@@ -14,33 +14,39 @@ export default function TransitionPage() {
         router.replace('/login')
         return
       }
-    } catch {}
+    } catch { }
 
-    const swoosh = new Audio('/transition-sound.mp3')
-    swoosh.volume = 0.25
+  const swoosh = new Audio('/transition-sound.mp3')
+  swoosh.preload = 'auto'
+  swoosh.volume = 0.25
 
     // Try to play immediately; if blocked, unlock on first user interaction
     const onInteract = async () => {
-      try { await swoosh.play() } catch {}
+      try { await swoosh.play() } catch { /* ignore */ }
       cleanupUnlock()
     }
     const attachUnlock = () => {
       window.addEventListener('pointerdown', onInteract, { once: true })
       window.addEventListener('keydown', onInteract, { once: true })
+      window.addEventListener('touchstart', onInteract, { once: true })
+      window.addEventListener('click', onInteract, { once: true })
     }
     const cleanupUnlock = () => {
       window.removeEventListener('pointerdown', onInteract)
       window.removeEventListener('keydown', onInteract)
+      window.removeEventListener('touchstart', onInteract)
+      window.removeEventListener('click', onInteract)
     }
 
     swoosh.play().catch(() => {
       attachUnlock()
     })
 
-    const t = setTimeout(() => router.push('/dashboard'), 2500)
+    const t = setTimeout(() => router.push('/dashboard'), 4000)
     return () => {
       clearTimeout(t)
       cleanupUnlock()
+      try { swoosh.pause() } catch {}
     }
   }, [router])
 

@@ -1,126 +1,263 @@
 "use client"
 
-import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Button from '@/components/Button'
-import Image from 'next/image'
+import { motion } from 'framer-motion'
+import styled from 'styled-components'
+import gsap from 'gsap'
 
+/* ===== ESTILOS GERAIS ===== */
+const Wrapper = styled.div`
+  min-height: 100vh;
+  background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  position: relative;
+`
+
+const Card = styled(motion.div)`
+  width: 400px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 50px 40px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(27, 107, 255, 0.1);
+  backdrop-filter: blur(12px);
+  z-index: 5;
+`
+
+const Input = styled.input`
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  padding: 14px;
+  margin-bottom: 16px;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+  &:focus {
+    border-color: #1b6bff;
+    box-shadow: 0 0 20px rgba(27, 107, 255, 0.4);
+  }
+`
+
+const Button = styled.button`
+  width: 100%;
+  background: linear-gradient(90deg, #1b6bff, #c88a2a);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 0 30px rgba(200, 138, 42, 0.25);
+  transition: 0.3s;
+  &:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 50px rgba(27, 107, 255, 0.4);
+  }
+`
+
+/* ===== FUNDO ENERGÉTICO ===== */
+function EnergyField() {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const move = (e: MouseEvent) => {
+      const { innerWidth, innerHeight } = window
+      const x = (e.clientX / innerWidth) * 100
+      const y = (e.clientY / innerHeight) * 100
+      gsap.to(el, {
+        background: `radial-gradient(circle at ${x}% ${y}%, rgba(27,107,255,0.25), rgba(200,138,42,0.15), rgba(0,0,0,1))`,
+        duration: 0.5,
+        ease: 'power2.out',
+      })
+    }
+    window.addEventListener('mousemove', move)
+    return () => window.removeEventListener('mousemove', move)
+  }, [])
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 0,
+        filter: 'blur(60px)',
+        transition: 'background 0.3s ease',
+      }}
+    />
+  )
+}
+
+/* ===== PARTÍCULAS ===== */
+function Particles() {
+  const ref = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const canvas = ref.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')!
+    type Particle = { x: number; y: number; r: number; dx: number; dy: number; color: string }
+    const particles: Particle[] = []
+    const num = 80
+
+    const resize = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    for (let i = 0; i < num; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2 + 1,
+        dx: (Math.random() - 0.5) * 1.2,
+        dy: (Math.random() - 0.5) * 1.2,
+        color: Math.random() > 0.5 ? '#1B6BFF' : '#C88A2A',
+      })
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      particles.forEach((p) => {
+        ctx.beginPath()
+        ctx.fillStyle = p.color
+        ctx.shadowBlur = 15
+        ctx.shadowColor = p.color
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+        ctx.fill()
+        p.x += p.dx
+        p.y += p.dy
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1
+      })
+      requestAnimationFrame(draw)
+    }
+    draw()
+  }, [])
+  return (
+    <canvas
+      ref={ref}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 0,
+      }}
+    />
+  )
+}
+
+/* ===== LOGIN PAGE ===== */
 export default function LoginPage() {
-  const router = useRouter()
-  const bgAudioRef = useRef<HTMLAudioElement | null>(null)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [phase, setPhase] = useState<'loading' | 'form'>('loading')
+  const logoRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
-    // Ambient loop on login screen
-    if (typeof Audio !== 'undefined') {
-      bgAudioRef.current = new Audio('/ambient-loop.mp3')
-      bgAudioRef.current.loop = true
-      bgAudioRef.current.volume = 0.05 // sutil
-      bgAudioRef.current.play().catch(() => {})
-    }
-    return () => {
-      if (bgAudioRef.current) {
-        bgAudioRef.current.pause()
-        bgAudioRef.current = null
-      }
-    }
+    // Boot sound (use existing asset)
+    const boot = new Audio('/startup-sound.mp3')
+    boot.volume = 0.4
+    boot.play().catch(() => {})
+
+    // Animação de pulsos no logo
+    const tl = gsap.timeline({ repeat: -1, yoyo: true })
+    tl.to(logoRef.current, {
+      textShadow:
+        '0 0 25px rgba(27,107,255,0.7), 0 0 45px rgba(200,138,42,0.6), 0 0 90px rgba(27,107,255,0.3)',
+      scale: 1.05,
+      duration: 2,
+      ease: 'power2.inOut',
+    }).to(logoRef.current, {
+      textShadow:
+        '0 0 15px rgba(200,138,42,0.5), 0 0 25px rgba(27,107,255,0.4), 0 0 60px rgba(200,138,42,0.2)',
+      scale: 1,
+      duration: 2,
+      ease: 'power2.inOut',
+    })
+
+    const t = setTimeout(() => {
+      tl.kill()
+      setPhase('form')
+    }, 4000)
+    return () => clearTimeout(t)
   }, [])
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
-    if (submitting) return
-    setSubmitting(true)
-    setError(null)
-
-    const ok = email.trim().toLowerCase() === 'admin@teste.com' && password === '123123'
-    if (!ok) {
-      setError('Credenciais inválidas. Verifique seu email e senha.')
-      setSubmitting(false)
-      return
-    }
-
-    // Startup sound on click
-    try {
-      const startupAudio = new Audio('/startup-sound.mp3')
-      startupAudio.volume = 0.3
-      await startupAudio.play()
-    } catch {}
-
-    // Mark session (simple client-side) and go to transition
-    try {
-      localStorage.setItem('auth', '1')
-    } catch {}
-    setTimeout(() => router.push('/transition'), 3000)
-  }
-
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#0A0A0A] text-white">
-      <div className="pointer-events-none absolute inset-0 opacity-80 mask-[radial-gradient(closest-side,black,transparent)] bg-[radial-gradient(900px_420px_at_20%_0%,rgba(27,107,255,0.18),transparent),radial-gradient(700px_360px_at_85%_10%,rgba(200,160,72,0.14),transparent)]" />
+    <Wrapper>
+      <EnergyField />
+      <Particles />
 
-      <div className="relative max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-12">
-        <header className="flex justify-between items-center mb-16">
-          <div className="flex items-center gap-3">
-            <Image src="/logo-nexio.png" alt="NEXIO" width={120} height={32} />
-            <span className="text-lg tracking-wide text-gray-300">KHVIER</span>
-          </div>
-        </header>
+      {phase === 'loading' && (
+        <motion.h1
+          ref={logoRef}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5 }}
+          style={{
+            fontSize: '62px',
+            fontWeight: 700,
+            background: 'linear-gradient(90deg, #1B6BFF, #C88A2A, #1B6BFF)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '5px',
+          }}
+        >
+          NEXIO SYSTEM
+        </motion.h1>
+      )}
 
-        <main className="grid md:grid-cols-2 gap-10 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+      {phase === 'form' && (
+        <Card
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2 }}
+        >
+          <motion.h2
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            style={{
+              fontSize: '22px',
+              color: '#C88A2A',
+              marginBottom: '8px',
+              letterSpacing: '2px',
+            }}
           >
-            <h1 className="text-3xl lg:text-4xl font-semibold mb-3">Bem-vindo ao NEXIO SYSTEM</h1>
-            <p className="text-gray-400 mb-8">Acesse seu painel inteligente com segurança.</p>
+            Inteligência Conectada
+          </motion.h2>
+          <p style={{ color: '#aaa', marginBottom: 30, fontSize: 15 }}>
+            Acesse o ecossistema NEXIO com autenticação segura e performance em tempo real.
+          </p>
 
-            <form onSubmit={handleLogin} className="bg-[#111] p-6 rounded-2xl shadow-[0_0_15px_rgba(27,107,255,0.15)] border border-[#1B1B1B]">
-              <label className="block text-sm text-gray-400 mb-2" htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full mb-4 rounded-xl bg-[#0E0E0E] border border-[#262626] px-4 py-3 outline-none focus:border-[#C8A048]"
-                placeholder="voce@nexio.com"
-              />
-              <label className="block text-sm text-gray-400 mb-2" htmlFor="password">Senha</label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full mb-6 rounded-xl bg-[#0E0E0E] border border-[#262626] px-4 py-3 outline-none focus:border-[#C8A048]"
-                placeholder="••••••••"
-              />
-              {error ? (
-                <p className="text-red-400 text-sm mb-4">{error}</p>
-              ) : null}
-              <Button type="submit" disabled={submitting} className="w-full h-12">
-                {submitting ? 'Entrando...' : 'Entrar'}
-              </Button>
-            </form>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="hidden md:block"
+          <Input type="email" placeholder="E-mail corporativo" />
+          <Input type="password" placeholder="Senha" />
+          <Button
+            onClick={() => {
+              const click = new Audio('/startup-sound.mp3')
+              click.volume = 0.4
+              click.play().catch(() => {})
+              try { localStorage.setItem('auth', '1') } catch {}
+              // small delay to let the click sound start
+              setTimeout(() => { window.location.href = '/dashboard' }, 700)
+            }}
           >
-            <div className="bg-[#111] rounded-2xl p-8 border border-[#1B1B1B] shadow-[0_0_15px_rgba(27,107,255,0.15)]">
-              <h3 className="text-xl font-semibold mb-2">Experiência Premium</h3>
-              <p className="text-gray-400">Design dark moderno com acentos dourados e azuis, responsivo e com animações sutis.</p>
-            </div>
-          </motion.div>
-        </main>
-      </div>
-    </div>
+            ENTRAR
+          </Button>
+        </Card>
+      )}
+    </Wrapper>
   )
 }
