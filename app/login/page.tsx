@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import styled from 'styled-components'
 import gsap from 'gsap'
 
 /* ===== ESTILOS GERAIS ===== */
+// Wrapper principal centraliza o conteúdo e aplica fundo radial escuro
 const Wrapper = styled.div`
   min-height: 100vh;
   background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
@@ -18,6 +20,7 @@ const Wrapper = styled.div`
   position: relative;
 `
 
+// Card do formulário com efeito de vidro (blur + baixa opacidade)
 const Card = styled(motion.div)`
   width: 400px;
   background: rgba(255, 255, 255, 0.03);
@@ -30,6 +33,7 @@ const Card = styled(motion.div)`
   z-index: 5;
 `
 
+// Campo de entrada com foco iluminado azul
 const Input = styled.input`
   width: 100%;
   background: rgba(255, 255, 255, 0.06);
@@ -47,6 +51,7 @@ const Input = styled.input`
   }
 `
 
+// Botão de ação com gradiente azul -> dourado e leve animação no hover
 const Button = styled.button`
   width: 100%;
   background: linear-gradient(90deg, #1b6bff, #c88a2a);
@@ -67,6 +72,7 @@ const Button = styled.button`
 `
 
 /* ===== FUNDO ENERGÉTICO ===== */
+// Campo dinâmico que segue o mouse e altera o gradiente de energia
 function EnergyField() {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -100,6 +106,7 @@ function EnergyField() {
 }
 
 /* ===== PARTÍCULAS ===== */
+// Canvas com partículas animadas (cores alternadas azul/dourado) flutuando
 function Particles() {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
@@ -164,30 +171,29 @@ function Particles() {
 /* ===== LOGIN PAGE ===== */
 export default function LoginPage() {
   const [phase, setPhase] = useState<'loading' | 'form'>('loading')
-  const logoRef = useRef<HTMLHeadingElement>(null)
+  // Referência para o elemento da logo (agora imagem)
+  const logoRef = useRef<HTMLImageElement>(null)
 
   useEffect(() => {
-    // Boot sound (use existing asset)
+    // Som de boot inicial
     const boot = new Audio('/startup-sound.mp3')
     boot.volume = 0.4
-    boot.play().catch(() => {})
+    boot.play().catch(() => { })
 
-    // Animação de pulsos no logo
+    // Animação de pulsos no logo usando GSAP (loop infinito até fase mudar)
     const tl = gsap.timeline({ repeat: -1, yoyo: true })
+    // Pulso suave na escala da logo (textShadow removido para imagem)
     tl.to(logoRef.current, {
-      textShadow:
-        '0 0 25px rgba(27,107,255,0.7), 0 0 45px rgba(200,138,42,0.6), 0 0 90px rgba(27,107,255,0.3)',
       scale: 1.05,
       duration: 2,
       ease: 'power2.inOut',
     }).to(logoRef.current, {
-      textShadow:
-        '0 0 15px rgba(200,138,42,0.5), 0 0 25px rgba(27,107,255,0.4), 0 0 60px rgba(200,138,42,0.2)',
       scale: 1,
       duration: 2,
       ease: 'power2.inOut',
     })
 
+    // Após 4s troca para fase do formulário
     const t = setTimeout(() => {
       tl.kill()
       setPhase('form')
@@ -201,62 +207,84 @@ export default function LoginPage() {
       <Particles />
 
       {phase === 'loading' && (
-        <motion.h1
+        // Logo sem fundo animada em fase de loading
+        <motion.img
           ref={logoRef}
+          src="/logosemfundo.png"
+          alt="Logo NEXIO"
+          width={420}
+          height={420}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.5 }}
           style={{
-            fontSize: '62px',
-            fontWeight: 700,
-            background: 'linear-gradient(90deg, #1B6BFF, #C88A2A, #1B6BFF)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '5px',
+            filter: 'drop-shadow(0 0 22px rgba(27,107,255,0.55)) drop-shadow(0 0 40px rgba(200,138,42,0.35))',
+            maxWidth: '320px',
+            marginTop: '40px', // levemente abaixo do centro
           }}
-        >
-          NEXIO SYSTEM
-        </motion.h1>
+        />
       )}
 
       {phase === 'form' && (
-        <Card
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2 }}
-        >
-          <motion.h2
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+        // Contêiner relativo para sobrepor a logo acima do Card
+        <div style={{ position: 'relative', display: 'inline-block', marginTop: '100px' }}>
+          {/* Logo sem fundo sobrepondo o topo do Card */}
+          <Image
+            src="/logosemfundo.png"
+            alt="Logo NEXIO"
+            width={200}
+            height={140}
             style={{
-              fontSize: '22px',
-              color: '#C88A2A',
-              marginBottom: '8px',
-              letterSpacing: '2px',
+              position: 'absolute',
+              left: '50%',
+              top: '-190px',
+              transform: 'translateX(-50%)',
+              filter:
+                'drop-shadow(0 0 14px rgba(27,107,255,0.35)) drop-shadow(0 0 22px rgba(200,138,42,0.25))',
+              zIndex: 6,
+              pointerEvents: 'none',
             }}
+            priority
+          />
+          <Card
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2 }}
           >
-            Inteligência Conectada
-          </motion.h2>
-          <p style={{ color: '#aaa', marginBottom: 30, fontSize: 15 }}>
-            Acesse o ecossistema NEXIO com autenticação segura e performance em tempo real.
-          </p>
+            <motion.h2
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              style={{
+                fontSize: '22px',
+                color: '#C88A2A',
+                marginBottom: '8px',
+                letterSpacing: '2px',
+              }}
+            >
+              Inteligência Conectada
+            </motion.h2>
+            <p style={{ color: '#aaa', marginBottom: 30, fontSize: 15 }}>
+              Acesse o ecossistema NEXIO com autenticação segura e performance em tempo real.
+            </p>
 
-          <Input type="email" placeholder="E-mail corporativo" />
-          <Input type="password" placeholder="Senha" />
-          <Button
-            onClick={() => {
-              const click = new Audio('/startup-sound.mp3')
-              click.volume = 0.4
-              click.play().catch(() => {})
-              try { localStorage.setItem('auth', '1') } catch {}
-              // small delay to let the click sound start
-              setTimeout(() => { window.location.href = '/dashboard' }, 700)
-            }}
-          >
-            ENTRAR
-          </Button>
-        </Card>
+            {/* Campos de entrada de credenciais (não validados neste demo) */}
+            <Input type="email" placeholder="E-mail corporativo" />
+            <Input type="password" placeholder="Senha" />
+            <Button
+              onClick={() => {
+                const click = new Audio('/startup-sound.mp3')
+                click.volume = 0.4
+                click.play().catch(() => { })
+                try { localStorage.setItem('auth', '1') } catch { }
+                // small delay to let the click sound start
+                setTimeout(() => { window.location.href = '/dashboard' }, 700)
+              }}
+            >
+              ENTRAR
+            </Button>
+          </Card>
+        </div>
       )}
     </Wrapper>
   )

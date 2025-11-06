@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
-// Simple mock performance endpoint.
-// In production, replace with a real data source (DB or 3rd-party API).
+// Endpoint de performance (mock)
+// Em produção, substituir por fonte real (DB/serviço externo)
 export async function GET() {
   const now = new Date()
   const hours = Array.from({ length: 12 }, (_, i) => {
@@ -10,7 +10,7 @@ export async function GET() {
     return `${d.getHours()}:00`
   })
 
-  // Generate some smooth-ish data
+  // Gera dados suavizados de exemplo
   const base = 50
   const clicks = hours.map((_, i) => Math.round(base + i * 8 + Math.sin(i / 2) * 6 + Math.random() * 5))
   const conv = clicks.map((c) => Math.round(c * (0.12 + Math.random() * 0.05)))
@@ -24,5 +24,6 @@ export async function GET() {
     dataConv: conv,
   }
 
+  // Desabilita cache para sempre trazer dados "atuais" no demo
   return NextResponse.json(payload, { headers: { 'Cache-Control': 'no-store' } })
 }

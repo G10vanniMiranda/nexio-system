@@ -4,11 +4,14 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 
+// Página de transição
+// - Exibe spinner e mensagem enquanto prepara o dashboard
+// - Toca som curto de transição (com fallback para interação caso autoplay bloqueie)
 export default function TransitionPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // If not authenticated, go back to login
+    // Verifica autenticação simples via localStorage
     try {
       if (localStorage.getItem('auth') !== '1') {
         router.replace('/login')
@@ -20,7 +23,7 @@ export default function TransitionPage() {
   swoosh.preload = 'auto'
   swoosh.volume = 0.25
 
-    // Try to play immediately; if blocked, unlock on first user interaction
+    // Tenta tocar imediatamente; se bloqueado, registra eventos para destravar
     const onInteract = async () => {
       try { await swoosh.play() } catch { /* ignore */ }
       cleanupUnlock()
@@ -42,6 +45,7 @@ export default function TransitionPage() {
       attachUnlock()
     })
 
+    // Após 4 segundos redireciona para o dashboard
     const t = setTimeout(() => router.push('/dashboard'), 4000)
     return () => {
       clearTimeout(t)

@@ -4,9 +4,12 @@ import { Line } from 'react-chartjs-2'
 import 'chart.js/auto'
 import type { Performance } from '@/types/dashboard'
 
+// Gráfico de performance (Cliques x Conversões) usando Chart.js
+// Recebe o objeto de performance com labels e datasets
 export default function PerformanceChart({ performance }: { performance: Performance }) {
     return (
         <div className="bg-[#111] p-6 rounded-2xl shadow-[0_0_15px_rgba(27,107,255,0.15)]">
+            {/* KPIs rápidos acima do gráfico */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-4">
                 <div>
                     <p className="text-3xl font-bold text-[#1B6BFF]">{performance.conversions}</p>

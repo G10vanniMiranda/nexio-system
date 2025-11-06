@@ -2,6 +2,8 @@
 
 import type { Lead } from '@/types/dashboard'
 
+// Tabela simples de leads capturados
+// Colunas: Nome, Telefone, Origem, Status, Data
 export default function LeadsTable({ leads }: { leads: Lead[] }) {
     return (
         <div className="overflow-x-auto bg-[#111] rounded-2xl shadow-md">
@@ -16,6 +18,7 @@ export default function LeadsTable({ leads }: { leads: Lead[] }) {
                     </tr>
                 </thead>
                 <tbody>
+                    {/* Linhas renderizadas a partir da lista de leads */}
                     {leads.map((lead, i) => (
                         <tr key={i} className="border-t border-gray-800 hover:bg-[#1B1B1B]">
                             <td className="p-3">{lead.name}</td>

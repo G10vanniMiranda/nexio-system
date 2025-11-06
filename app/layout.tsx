@@ -12,11 +12,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Metadados globais do aplicativo
 export const metadata: Metadata = {
   title: "NEXIO SYSTEM",
   description: "Painel de Performance Inteligente",
 };
 
+// Layout raiz envolvendo todas as páginas (App Router)
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* Children = páginas renderizadas */}
         {children}
       </body>
     </html>

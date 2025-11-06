@@ -12,6 +12,10 @@ import Footer from '@/components/Footer'
 import type { Performance, Lead } from '@/types/dashboard'
 import { TrendingUp, Users, MessageCircle, Bot, BarChart3 } from 'lucide-react'
 
+// Página principal do Dashboard
+// - Busca dados das APIs mock (/api/performance e /api/leads)
+// - Exibe gráficos, tabela e cards de features
+// - Toca um áudio ambiente sutil ao abrir
 export default function DashboardPage() {
     const router = useRouter()
     const [performance, setPerformance] = useState<Performance | null>(null)
@@ -19,7 +23,7 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true)
     const ambientRef = useRef<HTMLAudioElement | null>(null)
 
-    // Simple client-side guard for demo
+    // Guarda simples no cliente (demo): se não estiver logado, redireciona para /login
     useEffect(() => {
         try {
             if (localStorage.getItem('auth') !== '1') {
@@ -29,6 +33,7 @@ export default function DashboardPage() {
     }, [router])
 
     useEffect(() => {
+        // Função para buscar dados do backend (mock)
         async function fetchData() {
             const perfRes = await fetch('/api/performance')
             const leadsRes = await fetch('/api/leads')
@@ -36,15 +41,16 @@ export default function DashboardPage() {
             setLeads(await leadsRes.json())
         }
         fetchData()
+        // Atualiza automaticamente a cada 60s
         const interval = setInterval(fetchData, 60000)
 
-        // Ambient subtle sound on open (use the shared ambient loop to avoid missing asset)
+        // Áudio ambiente sutil ao abrir (loop baixo)
         if (typeof Audio !== 'undefined') {
             ambientRef.current = new Audio('/ambient-loop.mp3')
             ambientRef.current.loop = true
             ambientRef.current.volume = 0.01
             ambientRef.current.play().catch(() => {
-                // If autoplay is blocked, unlock on first user interaction
+                // Se o autoplay for bloqueado, destrava no primeiro gesto do usuário
                 const unlock = async () => {
                     try { await ambientRef.current?.play() } catch { }
                     window.removeEventListener('pointerdown', unlock)
@@ -55,7 +61,7 @@ export default function DashboardPage() {
             })
         }
 
-        // Soft entrance delay for loading screen
+        // Atraso suave para esconder a tela de carregamento
         const t = setTimeout(() => setLoading(false), 1200)
 
         return () => {
@@ -68,6 +74,7 @@ export default function DashboardPage() {
         }
     }, [])
 
+    // Estado de carregamento inicial
     if (loading || !performance) {
         return (
             <motion.div
@@ -93,6 +100,7 @@ export default function DashboardPage() {
         )
     }
 
+    // Conteúdo principal do dashboard
     return (
         <div className="min-h-screen relative overflow-hidden bg-[#0A0A0A] text-white font-[Outfit]">
             <div className="pointer-events-none absolute inset-0 opacity-80 mask-[radial-gradient(closest-side,black,transparent)] bg-[radial-gradient(1000px_500px_at_20%_0%,rgba(27,107,255,0.18),transparent),radial-gradient(800px_400px_at_85%_10%,rgba(200,160,72,0.14),transparent)]" />
